@@ -28,8 +28,6 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage> {
   final _cityController = TextEditingController();
-  final _latitudeController = TextEditingController();
-  final _longitudeController = TextEditingController();
   String _weatherData = "";
 
 Future<String> _getWeatherData(String apiKey, String city) async {
