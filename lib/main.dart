@@ -1,3 +1,5 @@
+// ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_key_in_widget_constructors
+
 import 'dart:convert';
 import 'api.dart';
 import 'package:flutter/material.dart';
@@ -15,12 +17,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: WeatherPage(),
+      home: const WeatherPage(),
     );
   }
 }
 
 class WeatherPage extends StatefulWidget {
+  const WeatherPage({Key? key}) : super(key: key);
+
   @override
   _WeatherPageState createState() => _WeatherPageState();
 }
@@ -38,97 +42,119 @@ class _WeatherPageState extends State<WeatherPage> {
       final double lon = data['coord']['lon'];
       return {'lat': lat, 'lon': lon};
     } else {
-      throw Exception('Failed to load city coordinates');
+      throw Exception('City not found or invalid');
     }
   }
 
-  
-
   Future<Map<String, dynamic>> _getWeatherData(
     String openWeatherApiKey, double lat, double lon) async {
-  final weatherResponse = await http.get(Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$openWeatherApiKey'));
-  final airQualityResponse = await http.get(Uri.parse(
-      'https://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$lon&appid=$openWeatherApiKey'));
+    final weatherResponse = await http.get(Uri.parse(
+        'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$openWeatherApiKey'));
+    final airQualityResponse = await http.get(Uri.parse(
+        'https://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$lon&appid=$openWeatherApiKey'));
 
-  if (weatherResponse.statusCode == 200 &&
-      airQualityResponse.statusCode == 200) {
-    final Map<String, dynamic> weatherData =
-        json.decode(weatherResponse.body);
-    final Map<String, dynamic> airQualityData =
-        json.decode(airQualityResponse.body);
+    if (weatherResponse.statusCode == 200 &&
+        airQualityResponse.statusCode == 200) {
+      final Map<String, dynamic> weatherData =
+          json.decode(weatherResponse.body);
+      final Map<String, dynamic> airQualityData =
+          json.decode(airQualityResponse.body);
 
-    final String description = weatherData['weather'][0]['description'];
-    final double temperatureInKelvin = weatherData['main']['temp'];
-    final double temperatureInCelsius = temperatureInKelvin - 273.15;
-    final int airQualityIndex = airQualityData['list'][0]['main']['aqi'];
+      final String description = weatherData['weather'][0]['description'];
+      final double temperatureInKelvin = weatherData['main']['temp'];
+      final double temperatureInCelsius = temperatureInKelvin - 273.15;
+      final int airQualityIndex = airQualityData['list'][0]['main']['aqi'];
 
-    // Additional features
-    final int timezoneSeconds = weatherData['timezone'];
-    final int timezoneHours = (timezoneSeconds / 3600).truncate();
-    final int timezoneMinutes = ((timezoneSeconds % 3600) ~/ 60).abs();
-    final String timezoneFormatted =
-        '${timezoneHours >= 0 ? '+' : '-'}${timezoneHours.abs()}:${timezoneMinutes.toString().padLeft(2, '0')}';
+      final int timezoneSeconds = weatherData['timezone'];
+      final int timezoneHours = (timezoneSeconds / 3600).truncate();
+      final int timezoneMinutes = ((timezoneSeconds % 3600) ~/ 60).abs();
+      final String timezoneFormatted =
+          '${timezoneHours >= 0 ? '+' : '-'}${timezoneHours.abs()}:${timezoneMinutes.toString().padLeft(2, '0')}';
 
-    final int cloudiness = weatherData['clouds']['all'];
-    final double windSpeed = weatherData['wind']['speed'];
-    final int windDirection = weatherData['wind']['deg'];
-    final double pressure = weatherData['main']['pressure'];
-    final int humidity = weatherData['main']['humidity'];
+      final int cloudiness = weatherData['clouds']['all'];
+      final double windSpeed = weatherData['wind']['speed'];
+      final int windDirection = weatherData['wind']['deg'];
+      final double pressure = weatherData['main']['pressure'];
+      final int humidity = weatherData['main']['humidity'];
 
-    return {
-      'description': description,
-      'temperature': temperatureInCelsius.toStringAsFixed(1),
-      'airQuality': airQualityIndex,
-      'timezone': timezoneFormatted,
-      'cloudiness': cloudiness,
-      'windSpeed': windSpeed,
-      'windDirection': windDirection,
-      'pressure': pressure,
-      'humidity': humidity,
-    };
-  } else {
-    throw Exception('Failed to load weather data');
+      return {
+        'description': description,
+        'temperature': temperatureInCelsius.toStringAsFixed(1),
+        'airQuality': airQualityIndex,
+        'timezone': timezoneFormatted,
+        'cloudiness': cloudiness,
+        'windSpeed': windSpeed,
+        'windDirection': windDirection,
+        'pressure': pressure,
+        'humidity': humidity,
+      };
+    } else {
+      throw Exception('Failed to load weather data');
+    }
   }
-}
-
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Weather App'),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Row(
+        children: [
+          Text(
+            'Weather App',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '[MAD MPR by Siddhant Dembi (19),Shreyas Dhamankar (22)]',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+        ],
       ),
+    ),
+    
+
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextFormField(
               controller: _cityController,
-              decoration: InputDecoration(labelText: 'City'),
+              decoration: const InputDecoration(labelText: 'City'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 String city = _cityController.text;
-                Map<String, dynamic> coordinates =
-                    await _getCityCoordinates(city);
-                double lat = coordinates['lat'];
-                double lon = coordinates['lon'];
-                Map<String, dynamic> weatherData =
-                    await _getWeatherData(openWeatherApiKey, lat, lon);
-                setState(() {
-                  _weatherData =
-                      'Latitude: $lat\nLongitude: $lon\nDescription: ${weatherData['description']}\nTemperature: ${weatherData['temperature']} °C\nAir Quality: ${weatherData['airQuality']}\nTimezone: ${weatherData['timezone']}\nCloudiness: ${weatherData['cloudiness']}%\nWind Speed: ${weatherData['windSpeed']} m/s\nWind Direction: ${weatherData['windDirection']}°\nPressure: ${weatherData['pressure']} hPa\nHumidity: ${weatherData['humidity']}%';
-                });
+                try {
+                  Map<String, dynamic> coordinates =
+                      await _getCityCoordinates(city);
+                  double lat = coordinates['lat'];
+                  double lon = coordinates['lon'];
+                  Map<String, dynamic> weatherData =
+                      await _getWeatherData(openWeatherApiKey, lat, lon);
+                  setState(() {
+                    _weatherData =
+                        'Latitude: $lat\nLongitude: $lon\nDescription: ${weatherData['description']}\nTemperature: ${weatherData['temperature']} °C\nAir Quality: ${weatherData['airQuality']}\nTimezone: ${weatherData['timezone']}\nCloudiness: ${weatherData['cloudiness']}%\nWind Speed: ${weatherData['windSpeed']} m/s\nWind Direction: ${weatherData['windDirection']}°\nPressure: ${weatherData['pressure']} hPa\nHumidity: ${weatherData['humidity']}%';
+                  });
+                } catch (error) {
+                  setState(() {
+                    _weatherData = 'Error: $error';
+                  });
+                }
               },
-              child: Text('Get Weather'),
+              child: const Text('Get Weather'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               _weatherData,
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
           ],
         ),
