@@ -104,16 +104,6 @@ Widget build(BuildContext context) {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '[MAD MPR by Siddhant Dembi (19),Shreyas Dhamankar (22)]',
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
         ],
       ),
     ),
